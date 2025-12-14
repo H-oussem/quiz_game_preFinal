@@ -211,12 +211,8 @@
         .model-container {
             flex: 1;
             position: relative;
-            background: linear-gradient(45deg, #0a1a0d, #000000);
+            background: #d3d3d3; /* Light grey background */
             transition: var(--transition-medium);
-        }
-        
-        .light-mode .model-container {
-            background: linear-gradient(45deg, #e8f5ed, #f0f7f3);
         }
         
         #model-viewer {
@@ -503,7 +499,8 @@
             setupScene() {
                 // Scene
                 this.scene = new THREE.Scene();
-                this.scene.background = new THREE.Color(0x000000);
+                // Light grey background
+                this.scene.background = new THREE.Color(0xd3d3d3);
                 
                 // Camera
                 const width = this.canvas.clientWidth;
@@ -567,11 +564,11 @@
                             const scale = 2 / maxDim;
                             this.model.scale.setScalar(scale * 0.8);
                             
-                            // Set materials
+                            // Set materials to light green
                             this.model.traverse((child) => {
                                 if (child.isMesh) {
                                     child.material = new THREE.MeshStandardMaterial({
-                                        color: 0xffffff,
+                                        color: 0x90EE90, // Light green color
                                         roughness: 0.7,
                                         metalness: 0.2
                                     });
@@ -596,7 +593,7 @@
                             resolve();
                         },
                         (progress) => {
-                            // Progress tracking could be added here
+                            // Progress tracking
                             const percent = (progress.loaded / progress.total * 100).toFixed(1);
                             const loadingText = document.querySelector('.loading-text');
                             if (loadingText) {

@@ -247,6 +247,13 @@
             box-shadow: 0 0 16px var(--accent-green-soft);
         }
         
+        .quiz-side-button.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+            transform: translateY(-50%);
+        }
+        
         .quiz-helper-text {
             font-size: 18px;
             color: var(--text-secondary);
@@ -257,6 +264,67 @@
         .quiz-helper-text .hint {
             color: var(--accent-green);
             font-weight: 500;
+        }
+        
+        /* Results section */
+        .quiz-results {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            border: 3px solid var(--accent-green);
+            border-radius: var(--card-border-radius);
+            padding: 40px;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: 0 0 30px var(--accent-green-soft);
+            z-index: 10;
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.8);
+            transition: all 0.4s ease;
+        }
+        
+        .quiz-results.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        .quiz-results h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: var(--accent-green);
+        }
+        
+        .score-display {
+            font-size: 72px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: var(--accent-green);
+            text-shadow: 0 0 10px var(--accent-green-soft);
+        }
+        
+        .score-message {
+            font-size: 20px;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        
+        .retry-button {
+            padding: 12px 36px;
+            font-size: 18px;
+            background: var(--accent-green);
+            color: white;
+            border: none;
+            border-radius: var(--button-border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .retry-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--accent-green-soft);
         }
         
         /* 3D VIEWER */
@@ -305,6 +373,14 @@
             
             .back-button {
                 top: 70px;
+            }
+            
+            .quiz-results {
+                padding: 25px;
+            }
+            
+            .score-display {
+                font-size: 48px;
             }
         }
         
@@ -359,6 +435,17 @@
                 <div class="quiz-helper-text" id="helper-text">
                     <span class="hint">Tip:</span> Swipe left or tap "Yes", swipe right or tap "No" to answer.
                 </div>
+            </div>
+            
+            <!-- Results section (hidden initially) -->
+            <div class="quiz-results" id="quiz-results">
+                <h2>Quiz Completed!</h2>
+                <div>Your mental wellness score:</div>
+                <div class="score-display" id="score-display">0/10</div>
+                <div class="score-message" id="score-message">
+                    Thank you for completing the assessment.
+                </div>
+                <button class="retry-button" id="retry-btn">Try Again</button>
             </div>
         </div>
         <!-- 3D VIEWER -->
@@ -429,12 +516,18 @@
         ];
         
         let currentQuestionIndex = 0;
+        let score = 0;
+        let quizCompleted = false;
         const questionElement = document.getElementById("quiz-question");
         const iconElement = document.getElementById("quiz-icon");
         const yesButton = document.getElementById("btn-yes");
         const noButton = document.getElementById("btn-no");
         const helperText = document.getElementById("helper-text");
         const progressElement = document.getElementById("quiz-progress");
+        const resultsElement = document.getElementById("quiz-results");
+        const scoreDisplay = document.getElementById("score-display");
+        const scoreMessage = document.getElementById("score-message");
+        const retryButton = document.getElementById("retry-btn");
         
         function updateProgressText() {
             progressElement.innerHTML =
@@ -464,7 +557,18 @@
             }, 200);
         }
         
-        function advanceQuestion() {
+        function advanceQuestion(isYesAnswer) {
+            if (quizCompleted) return;
+            
+            // For "yes" answers, increase score and red fill level
+            if (isYesAnswer) {
+                score++;
+                if (model && redFillLevel < MAX_FILL_LEVEL) {
+                    redFillLevel++;
+                    targetRedPercent = redFillLevel / MAX_FILL_LEVEL;
+                }
+            }
+            
             if (currentQuestionIndex < questions.length - 1) {
                 currentQuestionIndex++;
                 showCurrentQuestionWithAnimation();
@@ -476,15 +580,108 @@
                         '<span class="hint">Great!</span> Keep going at your own pace.';
                 }
             } else {
-                helperText.innerHTML =
-                    '<span class="hint">Well done.</span> Quiz completed. Thank you for answering.';
+                // Quiz completed
+                quizCompleted = true;
+                showResults();
             }
+        }
+        
+        function showResults() {
+            // Update score display
+            scoreDisplay.textContent = `${score}/10`;
+            
+            // Set appropriate message based on score
+            if (score <= 2) {
+                scoreMessage.innerHTML = "You're doing well! Your mental wellness appears to be in good shape. Keep taking care of yourself!";
+            } else if (score <= 5) {
+                scoreMessage.innerHTML = "You may be experiencing some challenges with your mental wellness. Consider talking to someone you trust or a healthcare professional.";
+            } else if (score <= 8) {
+                scoreMessage.innerHTML = "Your responses indicate significant mental wellness concerns. We strongly recommend speaking with a healthcare professional soon.";
+            } else {
+                scoreMessage.innerHTML = "Your responses suggest urgent mental health needs. Please contact a crisis line or healthcare provider immediately. You're not alone.";
+            }
+            
+            // Show results with animation
+            setTimeout(() => {
+                resultsElement.classList.add('show');
+            }, 500);
+            
+            // Disable buttons
+            disableAnswerButtons();
+        }
+        
+        function disableAnswerButtons() {
+            yesButton.classList.add('disabled');
+            noButton.classList.add('disabled');
+            
+            // Remove event listeners
+            yesButton.removeEventListener('click', handleYesClick);
+            noButton.removeEventListener('click', handleNoClick);
+            
+            // Disable swipe gestures
+            document.removeEventListener('touchstart', handleTouchStart);
+            document.removeEventListener('touchend', handleTouchEnd);
+        }
+        
+        function enableAnswerButtons() {
+            yesButton.classList.remove('disabled');
+            noButton.classList.remove('disabled');
+            
+            // Add event listeners back
+            yesButton.addEventListener('click', handleYesClick);
+            noButton.addEventListener('click', handleNoClick);
+            
+            // Enable swipe gestures
+            document.addEventListener('touchstart', handleTouchStart);
+            document.addEventListener('touchend', handleTouchEnd);
+        }
+        
+        function resetQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            quizCompleted = false;
+            redFillLevel = 0;
+            targetRedPercent = 0;
+            currentRedPercent = 0;
+            
+            // Hide results
+            resultsElement.classList.remove('show');
+            
+            // Reset progress
+            updateProgressText();
+            
+            // Reset buttons
+            yesButton.classList.remove('yes-active');
+            noButton.classList.remove('no-active');
+            
+            // Enable buttons again
+            enableAnswerButtons();
+            
+            // Reset helper text
+            helperText.innerHTML =
+                '<span class="hint">Tip:</span> Swipe left or tap "Yes", swipe right or tap "No" to answer.';
+            
+            // Show first question
+            applyQuestionContent();
+        }
+        
+        // Event handlers for buttons
+        function handleYesClick() {
+            if (quizCompleted) return;
+            flashButton(yesButton, 'yes');
+            advanceQuestion(true);
+        }
+        
+        function handleNoClick() {
+            if (quizCompleted) return;
+            flashButton(noButton, 'no');
+            advanceQuestion(false);
         }
         
         // Initialize first question
         applyQuestionContent();
         
-        // ---------- THREE.JS + RED PROGRESSION WITH GRADUAL COLOR ----------
+        // ---------- THREE.JS + RED PROGRESSION WITH NEUTRAL BASE ----------
         let scene, camera, renderer, model;
         let redFillLevel = 0;
         const MAX_FILL_LEVEL = 10;
@@ -503,7 +700,8 @@
         
         function initScene() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x000000);
+            // Changed background to light grey
+            scene.background = new THREE.Color(0xd3d3d3);
             
             const canvas = document.getElementById('model-viewer');
             const width = canvas.clientWidth || window.innerWidth * 0.4;
@@ -540,9 +738,10 @@
                                 const count = geometry.attributes.position.count;
                                 const colors = new Float32Array(count * 3);
                                 for (let i = 0; i < colors.length; i += 3) {
-                                    colors[i] = 1.0;
-                                    colors[i + 1] = 1.0;
-                                    colors[i + 2] = 1.0;
+                                    // Set initial color to light green
+                                    colors[i] = 0.7;     // R component
+                                    colors[i + 1] = 1.0; // G component (max for green)
+                                    colors[i + 2] = 0.7; // B component
                                 }
                                 geometry.setAttribute(
                                     'color',
@@ -615,17 +814,21 @@
                         const y = positions[i + 1];
                         const normalizedY =
                             (y - minY) / (maxY - minY);
-                        let r = 1.0,
+                        let r = 0.7,
                             g = 1.0,
-                            b = 1.0;
+                            b = 0.7;
+                        // Only apply red to areas that are below the fill level
                         if (normalizedY <= redPercent && redPercent > 0) {
-                            const redIntensity = Math.max(
+                            // First remove the green component completely
+                            // Then add red based on intensity
+                            const intensity = Math.max(
                                 0,
                                 1 - normalizedY / redPercent
                             );
+                            // Pure red without green component to avoid orange
                             r = 1.0;
-                            g = 1.0 - redIntensity;
-                            b = 1.0 - redIntensity;
+                            g = 1.0 - intensity; // Start removing green
+                            b = 1.0 - intensity; // Also remove blue for pure red effect
                         }
                         colors[colorIndex] = r;
                         colors[colorIndex + 1] = g;
@@ -643,45 +846,37 @@
             }, 180);
         }
         
-        yesButton.addEventListener('click', () => {
-            if (!model) return;
-            if (redFillLevel < MAX_FILL_LEVEL) {
-                redFillLevel++;
-                targetRedPercent = redFillLevel / MAX_FILL_LEVEL;
-            }
-            flashButton(yesButton, 'yes');
-            advanceQuestion();
-        });
+        // Set up button event listeners
+        yesButton.addEventListener('click', handleYesClick);
+        noButton.addEventListener('click', handleNoClick);
         
-        noButton.addEventListener('click', () => {
-            if (!model) return;
-            if (redFillLevel > 0) {
-                redFillLevel--;
-                targetRedPercent = redFillLevel / MAX_FILL_LEVEL;
-            }
-            flashButton(noButton, 'no');
-            advanceQuestion();
-        });
+        // Retry button functionality
+        retryButton.addEventListener('click', resetQuiz);
         
         // Basic swipe detection (left = yes, right = no)
         let touchStartX = null;
-        document.addEventListener('touchstart', (e) => {
-            if (!e.touches || e.touches.length === 0) return;
-            touchStartX = e.touches[0].clientX;
-        });
         
-        document.addEventListener('touchend', (e) => {
-            if (touchStartX === null) return;
+        function handleTouchStart(e) {
+            if (!e.touches || e.touches.length === 0 || quizCompleted) return;
+            touchStartX = e.touches[0].clientX;
+        }
+        
+        function handleTouchEnd(e) {
+            if (touchStartX === null || quizCompleted) return;
             const touchEndX = e.changedTouches[0].clientX;
             const deltaX = touchEndX - touchStartX;
             const threshold = 50;
             if (deltaX < -threshold) {
-                yesButton.click();
+                handleYesClick();
             } else if (deltaX > threshold) {
-                noButton.click();
+                handleNoClick();
             }
             touchStartX = null;
-        });
+        }
+        
+        // Add swipe event listeners
+        document.addEventListener('touchstart', handleTouchStart);
+        document.addEventListener('touchend', handleTouchEnd);
     </script>
 </body>
 </html>

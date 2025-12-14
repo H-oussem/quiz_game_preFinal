@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MindBalance - Take care of your mental health through guided questions and mindfulness">
+    <title>MindBalance – Start</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="media/mindly.jpg" as="image">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" as="script">
+    
+    <style>
+        :root {
+            /* Dark mode defaults */
+            --bg-color: #121212;
+            --panel-bg: #1e1e1e;
+            --text-color: #ffffff;
+            --text-secondary: #cfcfcf;
+            --border-color: #3a3a3a;
+            --button-bg: #2a2a2a;
+            --button-text: #e0e0e0;
+            
+            /* Accent colors - updated to requested green */
+            --accent-green: #46c47e;
+            --accent-green-hover: #5ad18f;
+            --accent-green-light: rgba(70, 196, 126, 0.1);
+            --shadow-green: 0 0 20px rgba(70, 196, 126, 0.3);
+            --shadow-green-hover: 0 0 28px rgba(70, 196, 126, 0.45);
+            
+            /* Common styles */
+            --transition-fast: 0.15s ease;
+            --transition-medium: 0.3s ease;
+            --transition-slow: 0.5s ease;
+            --border-radius: 12px;
+            --border-radius-round: 999px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Light mode */
+        .light-mode {
+            --bg-color: #f8f9fa;
+            --panel-bg: #ffffff;
+            --text-color: #212529;
+            --text-secondary: #6c757d;
+            --border-color: #dee2e6;
+            --button-bg: #e9ecef;
+            --button-text: #495057;
+            
+            --accent-green-light: rgba(70, 196, 126, 0.15);
+            --shadow-green: 0 0 20px rgba(70, 196, 126, 0.2);
+            --shadow-green-hover: 0 0 28px rgba(70, 196, 126, 0.3);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: var(--text-color);
+            overflow: hidden;
+            min-height: 100vh;
+            line-height: 1.5;
+            transition: var(--transition-medium);
+        }
+        
+        .app-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+        }
+        
+        /* Theme toggle button */
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--button-bg);
+            border: 2px solid var(--border-color);
+            color: var(--button-text);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: var(--transition-fast);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+        
+        /* LEFT PANEL */
+        .left-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            padding: min(5vw, 64px);
+            position: relative;
+            z-index: 2;
+            background: var(--panel-bg);
+            overflow-y: auto;
+            max-height: 100vh;
+            transition: var(--transition-medium);
+        }
+        
+        .logo {
+            width: min(180px, 25vw);
+            height: min(180px, 25vw);
+            background: center/contain no-repeat url("media/mindly.jpg");
+            margin-bottom: clamp(20px, 4vh, 40px);
+            filter: drop-shadow(0 4px 8px var(--accent-green-light));
+            animation: gentlePulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes gentlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        .intro-text {
+            font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+            line-height: 1.6;
+            max-width: min(520px, 90%);
+            margin-bottom: clamp(24px, 5vh, 40px);
+            font-weight: 300;
+            color: var(--text-secondary);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s var(--transition-medium) forwards;
+            animation-delay: 0.2s;
+        }
+        
+        .intro-text strong {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .intro-begin-btn {
+            padding: clamp(12px, 2vh, 16px) clamp(32px, 4vw, 46px);
+            font-size: clamp(1rem, 1.8vw, 1.375rem);
+            font-weight: 600;
+            border-radius: var(--border-radius-round);
+            border: none;
+            cursor: pointer;
+            color: var(--button-text);
+            background: var(--accent-green);
+            box-shadow: var(--shadow-green);
+            transition: all var(--transition-fast);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s var(--transition-medium) forwards;
+            animation-delay: 0.4s;
+        }
+        
+        .intro-begin-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.7s ease;
+        }
+        
+        .intro-begin-btn:hover {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: var(--shadow-green-hover);
+            background: var(--accent-green-hover);
+        }
+        
+        .intro-begin-btn:hover::after {
+            left: 100%;
+        }
+        
+        .intro-begin-btn:active {
+            transform: translateY(0) scale(0.98);
+            box-shadow: 0 0 16px rgba(70, 196, 126, 0.4);
+        }
+        
+        .intro-begin-btn:focus-visible {
+            outline: 2px solid var(--accent-green);
+            outline-offset: 4px;
+        }
+        
+        /* RIGHT PANEL - 3D Viewer */
+        .model-container {
+            flex: 1;
+            position: relative;
+            background: #d3d3d3; /* Light grey background */
+            transition: var(--transition-medium);
+        }
+        
+        #model-viewer {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .model-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1;
+            opacity: 1;
+            transition: opacity var(--transition-medium);
+        }
+        
+        .light-mode .model-overlay {
+            background: rgba(255, 255, 255, 0.7);
+        }
+        
+        .model-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--accent-green-light);
+            border-top: 4px solid var(--accent-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+        
+        .error-message {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 50, 50, 0.1);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255, 50, 50, 0.3);
+            max-width: 80%;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .error-message p {
+            margin-bottom: 10px;
+        }
+        
+        .error-retry-btn {
+            padding: 8px 20px;
+            background: var(--accent-green);
+            color: var(--button-text);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: background var(--transition-fast);
+        }
+        
+        .error-retry-btn:hover {
+            background: var(--accent-green-hover);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 900px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            .left-panel {
+                order: 1;
+                padding: clamp(20px, 5vw, 32px);
+                min-height: 60vh;
+                justify-content: flex-start;
+            }
+            
+            .model-container {
+                order: 2;
+                height: 40vh;
+                min-height: 300px;
+            }
+            
+            .logo {
+                margin-bottom: clamp(16px, 3vh, 24px);
+            }
+            
+            .intro-text {
+                font-size: clamp(1.1rem, 4vw, 1.4rem);
+                margin-bottom: clamp(20px, 4vh, 32px);
+            }
+            
+            .intro-begin-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .left-panel {
+                padding: 20px;
+            }
+            
+            .intro-begin-btn {
+                padding: 14px 28px;
+                font-size: 1.1rem;
+            }
+        }
+        
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            
+            .intro-begin-btn::after {
+                display: none;
+            }
+        }
+        
+        /* Performance optimizations */
+        .will-change-transform {
+            will-change: transform;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Theme toggle button -->
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle light/dark mode">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path class="sun-path" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" stroke-linecap="round" stroke-linejoin="round"/>
+                <path class="moon-path" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke-linecap="round" stroke-linejoin="round" style="display: none"/>
+            </svg>
+        </button>
+        
+        <!-- LEFT PANEL -->
+        <div class="left-panel">
+            <div class="logo" role="img" aria-label="MindBalance Logo"></div>
+            <div class="intro-text">
+                Prenez soin de votre <strong>santé mentale</strong> en répondant aux questions !<br>
+                Restez équilibré avec <strong>MindBalance</strong> 😊
+            </div>
+            <button class="intro-begin-btn" id="begin-btn" aria-label="Begin mental health assessment">
+                Begin
+            </button>
+        </div>
+        <!-- RIGHT PANEL - 3D Viewer -->
+        <div class="model-container">
+            <div class="model-overlay" id="model-overlay">
+                <div class="loading-spinner" aria-hidden="true"></div>
+                <div class="loading-text">Loading 3D Model...</div>
+                <div class="error-message" id="error-message">
+                    <p>Unable to load 3D model.</p>
+                    <button class="error-retry-btn" id="retry-btn">Retry</button>
+                </div>
+            </div>
+            <canvas id="model-viewer" aria-label="Interactive 3D model of a person"></canvas>
+        </div>
+    </div>
+    <!-- Three.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const sunPath = document.querySelector('.sun-path');
+        const moonPath = document.querySelector('.moon-path');
+        
+        // Check for saved theme preference or respect OS preference
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        
+        if (savedTheme === 'light' || (!savedTheme && !prefersDarkScheme.matches)) {
+            document.body.classList.add('light-mode');
+            sunPath.style.display = 'none';
+            moonPath.style.display = 'block';
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            
+            // Toggle icon
+            if (document.body.classList.contains('light-mode')) {
+                sunPath.style.display = 'none';
+                moonPath.style.display = 'block';
+                localStorage.setItem('theme', 'light');
+            } else {
+                sunPath.style.display = 'block';
+                moonPath.style.display = 'none';
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+        
+        // Navigation
+        const beginBtn = document.getElementById('begin-btn');
+        beginBtn.addEventListener('click', () => {
+            beginBtn.disabled = true;
+            beginBtn.textContent = 'Loading...';
+            setTimeout(() => {
+                window.location.href = "index.html";
+            }, 300);
+        });
+        
+        // Handle Enter key press on button
+        beginBtn.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                beginBtn.click();
+            }
+        });
+        
+        // 3D Model Viewer
+        class ModelViewer {
+            constructor() {
+                this.canvas = document.getElementById('model-viewer');
+                this.overlay = document.getElementById('model-overlay');
+                this.errorMessage = document.getElementById('error-message');
+                this.retryBtn = document.getElementById('retry-btn');
+                
+                this.scene = null;
+                this.camera = null;
+                this.renderer = null;
+                this.model = null;
+                this.clock = new THREE.Clock();
+                this.mixer = null;
+                this.animationId = null;
+                this.isInitialized = false;
+                
+                this.init();
+            }
+            
+            async init() {
+                try {
+                    await this.loadGLTFLoader();
+                    this.setupScene();
+                    await this.loadModel();
+                    this.setupResizeHandler();
+                    this.animate();
+                } catch (error) {
+                    console.error('Failed to initialize 3D viewer:', error);
+                    this.showError();
+                }
+            }
+            
+            loadGLTFLoader() {
+                return new Promise((resolve, reject) => {
+                    if (typeof THREE.GLTFLoader !== 'undefined') {
+                        resolve();
+                        return;
+                    }
+                    
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.min.js';
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                });
+            }
+            
+            setupScene() {
+                // Scene
+                this.scene = new THREE.Scene();
+                // Light grey background
+                this.scene.background = new THREE.Color(0xd3d3d3);
+                
+                // Camera
+                const width = this.canvas.clientWidth;
+                const height = this.canvas.clientHeight;
+                this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+                this.camera.position.set(0, 0.5, 4);
+                
+                // Renderer
+                this.renderer = new THREE.WebGLRenderer({
+                    canvas: this.canvas,
+                    antialias: true,
+                    alpha: true,
+                    powerPreference: 'high-performance'
+                });
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                this.renderer.setSize(width, height);
+                this.renderer.shadowMap.enabled = true;
+                this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                
+                // Lighting
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+                this.scene.add(ambientLight);
+                
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight.position.set(5, 10, 7);
+                directionalLight.castShadow = true;
+                directionalLight.shadow.mapSize.width = 1024;
+                directionalLight.shadow.mapSize.height = 1024;
+                this.scene.add(directionalLight);
+                
+                // Green accent light
+                const greenLight = new THREE.PointLight(0x46c47e, 0.5, 10);
+                greenLight.position.set(0, 2, 3);
+                this.scene.add(greenLight);
+                
+                this.isInitialized = true;
+            }
+            
+            async loadModel() {
+                return new Promise((resolve, reject) => {
+                    const loader = new THREE.GLTFLoader();
+                    
+                    // Show loading state
+                    this.overlay.classList.remove('hidden');
+                    
+                    loader.load(
+                        'basic-human-model.glb/scene.gltf',
+                        (gltf) => {
+                            this.model = gltf.scene;
+                            this.scene.add(this.model);
+                            
+                            // Center and scale model
+                            const box = new THREE.Box3().setFromObject(this.model);
+                            const center = box.getCenter(new THREE.Vector3());
+                            const size = box.getSize(new THREE.Vector3());
+                            
+                            this.model.position.sub(center);
+                            this.model.position.y -= size.y / 2;
+                            
+                            const maxDim = Math.max(size.x, size.y, size.z);
+                            const scale = 2 / maxDim;
+                            this.model.scale.setScalar(scale * 0.8);
+                            
+                            // Set materials to light green
+                            this.model.traverse((child) => {
+                                if (child.isMesh) {
+                                    child.material = new THREE.MeshStandardMaterial({
+                                        color: 0x90EE90, // Light green color
+                                        roughness: 0.7,
+                                        metalness: 0.2
+                                    });
+                                    child.castShadow = true;
+                                    child.receiveShadow = true;
+                                }
+                            });
+                            
+                            // Setup animations if any
+                            if (gltf.animations && gltf.animations.length) {
+                                this.mixer = new THREE.AnimationMixer(this.model);
+                                gltf.animations.forEach((clip) => {
+                                    this.mixer.clipAction(clip).play();
+                                });
+                            }
+                            
+                            // Hide loading overlay with delay
+                            setTimeout(() => {
+                                this.overlay.classList.add('hidden');
+                            }, 500);
+                            
+                            resolve();
+                        },
+                        (progress) => {
+                            // Progress tracking
+                            const percent = (progress.loaded / progress.total * 100).toFixed(1);
+                            const loadingText = document.querySelector('.loading-text');
+                            if (loadingText) {
+                                loadingText.textContent = `Loading 3D Model... ${percent}%`;
+                            }
+                        },
+                        (error) => {
+                            console.error('Error loading model:', error);
+                            reject(error);
+                        }
+                    );
+                });
+            }
+            
+            showError() {
+                this.errorMessage.classList.add('show');
+                this.retryBtn.addEventListener('click', () => {
+                    this.errorMessage.classList.remove('show');
+                    this.init();
+                });
+            }
+            
+            setupResizeHandler() {
+                let resizeTimeout;
+                const resize = () => {
+                    if (resizeTimeout) clearTimeout(resizeTimeout);
+                    
+                    resizeTimeout = setTimeout(() => {
+                        const width = this.canvas.clientWidth;
+                        const height = this.canvas.clientHeight;
+                        
+                        this.camera.aspect = width / height;
+                        this.camera.updateProjectionMatrix();
+                        this.renderer.setSize(width, height);
+                    }, 100);
+                };
+                
+                window.addEventListener('resize', resize);
+                // Initial resize
+                resize();
+            }
+            
+            animate() {
+                if (!this.isInitialized) return;
+                
+                this.animationId = requestAnimationFrame(() => this.animate());
+                
+                const delta = this.clock.getDelta();
+                
+                if (this.model) {
+                    // Gentle rotation
+                    this.model.rotation.y += delta * 0.2;
+                    
+                    // Subtle floating animation
+                    this.model.position.y = Math.sin(Date.now() * 0.001) * 0.05;
+                }
+                
+                if (this.mixer) {
+                    this.mixer.update(delta);
+                }
+                
+                this.renderer.render(this.scene, this.camera);
+            }
+            
+            cleanup() {
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                }
+                
+                if (this.renderer) {
+                    this.renderer.dispose();
+                }
+                
+                if (this.model) {
+                    this.model.traverse((child) => {
+                        if (child.material) {
+                            child.material.dispose();
+                        }
+                        if (child.geometry) {
+                            child.geometry.dispose();
+                        }
+                    });
+                }
+            }
+        }
+        
+        // Initialize 3D viewer when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            const viewer = new ModelViewer();
+            
+            // Cleanup on page unload
+            window.addEventListener('beforeunload', () => {
+                viewer.cleanup();
+            });
+        });
+        
+        // Performance optimization: throttle animations when tab is not visible
+        document.addEventListener('visibilitychange', () => {
+            const animationFrames = document.querySelectorAll('.will-change-transform');
+            if (document.hidden) {
+                animationFrames.forEach(el => el.classList.remove('will-change-transform'));
+            } else {
+                animationFrames.forEach(el => el.classList.add('will-change-transform'));
+            }
+        });
+    </script>
+</body>
+</html>
